@@ -28,28 +28,28 @@ services:
                   - NATS_SERVERS=${NATS_SERVER_CONNECTION_URI}
                   - DATABASE_URL=file:./dev.db
 
-      # orders-ms:
-      #       depends_on:
-      #             - orders-db
-      #       build: ./orders-ms
-      #       volumes:
-      #             - ./orders-ms/src:/usr/src/app/src
-      #       command: npm run start:dev
-      #       environment:
-      #             - PORT=3002
-      #             - NATS_SERVERS=${NATS_SERVER_CONNECTION_URI}
-      #             - DATABASE_URL=postgres://${ORDERS_POSTGRES_USER}:${ORDERS_POSTGRES_PASSWORD}@orders-db:5432/${ORDERS_POSTGRES_DB}?schema=public
+      orders-ms:
+            depends_on:
+                  - orders-db
+            build: ./orders-ms
+            volumes:
+                  - ./orders-ms/src:/usr/src/app/src
+            command: npm run start:dev
+            environment:
+                  - PORT=3002
+                  - NATS_SERVERS=${NATS_SERVER_CONNECTION_URI}
+                  - DATABASE_URL=postgres://${ORDERS_POSTGRES_USER}:${ORDERS_POSTGRES_PASSWORD}@orders-db:5432/${ORDERS_POSTGRES_DB}?schema=public
 
-      # orders-db:
-      #       container_name: orders_database
-      #       image: postgres:latest
-      #       restart: always
-      #       volumes:
-      #             - ./orders-ms/postgres:/var/lib/postgresql/data
-      #       # Esto expone la base de datos en el puerto 5432 al publico, solo debe ser usado en desarrollo
-      #       ports:
-      #             - "5432:5432"
-      #       environment:
-      #             POSTGRES_USER: ${ORDERS_POSTGRES_USER}
-      #             POSTGRES_PASSWORD: ${ORDERS_POSTGRES_PASSWORD}
-      #             POSTGRES_DB: ${ORDERS_POSTGRES_DB}
+      orders-db:
+            container_name: orders_database
+            image: postgres:latest
+            restart: always
+            volumes:
+                  - ./orders-ms/postgres:/var/lib/postgresql/data
+            # Esto expone la base de datos en el puerto 5432 al publico, solo debe ser usado en desarrollo
+            ports:
+                  - "5432:5432"
+            environment:
+                  POSTGRES_USER: ${ORDERS_POSTGRES_USER}
+                  POSTGRES_PASSWORD: ${ORDERS_POSTGRES_PASSWORD}
+                  POSTGRES_DB: ${ORDERS_POSTGRES_DB}
