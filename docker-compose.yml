@@ -3,7 +3,6 @@ version: "3.8"
 services:
       nats-server:
             image: nats:latest
-            # Exponemos el puero NATS_SERVER_DASHBOARD_PORT para disponer del dashboard de nats en desarrollo, en produccion no es necesario
             ports:
                   - ${NATS_SERVER_DASHBOARD_PORT}:${NATS_SERVER_DASHBOARD_PORT}
 
@@ -39,6 +38,9 @@ services:
                   - PORT=3002
                   - NATS_SERVERS=${NATS_SERVER_CONNECTION_URI}
                   - DATABASE_URL=postgres://${ORDERS_POSTGRES_USER}:${ORDERS_POSTGRES_PASSWORD}@orders-db:5432/${ORDERS_POSTGRES_DB}?schema=public
+                  - EXPIRATION_TYPE=${EXPIRATION_TYPE}
+                  - EXPIRATION_VALUE=${EXPIRATION_VALUE}
+                  - RECEIPT_URL=${RECEIPT_URL}
 
       orders-db:
             container_name: orders_database
@@ -46,10 +48,55 @@ services:
             restart: always
             volumes:
                   - ./orders-ms/postgres:/var/lib/postgresql/data
-            # Esto expone la base de datos en el puerto 5432 al publico, solo debe ser usado en desarrollo
             ports:
                   - "5432:5432"
             environment:
                   POSTGRES_USER: ${ORDERS_POSTGRES_USER}
                   POSTGRES_PASSWORD: ${ORDERS_POSTGRES_PASSWORD}
                   POSTGRES_DB: ${ORDERS_POSTGRES_DB}
+
+      users-ms:
+            depends_on:
+                  - users-db
+            build: ./users-ms
+            volumes:
+                  - ./users-ms/src:/usr/src/app/src
+            command: npm run start:dev
+            environment:
+                  - PORT=3004
+                  - NATS_SERVERS=${NATS_SERVER_CONNECTION_URI}
+                  - DATABASE_URL=postgresql://postgres:123456@users-db:5433/usersdb?schema=public
+
+      users-db:
+            container_name: users_database
+            image: postgres:latest
+            restart: always
+            volumes:
+                  - ./users-ms/postgres:/var/lib/postgresql/data
+                  - ./users-ms/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
+            ports:
+                  - "5433:5433"
+            environment:
+                  POSTGRES_USER: ${USERS_POSTGRES_USER}
+                  POSTGRES_PASSWORD: ${USERS_POSTGRES_PASSWORD}
+                  POSTGRES_DB: ${USERS_POSTGRES_DB}
+            command: postgres -c 'config_file=/etc/postgresql/postgresql.conf' -p 5433
+
+      payments-ms:
+            container_name: payments-ms
+            build: ./payments-ms
+            ports:
+                  - ${PAYMENTS_MS_PORT}:${PAYMENTS_MS_PORT}
+            volumes:
+                  - ./payments-ms/src:/usr/src/app/src
+            command: npm run start:dev
+            environment:
+                  - PORT=${PAYMENTS_MS_PORT}
+                  - NATS_SERVERS=${NATS_SERVER_CONNECTION_URI}
+                  - API_KEY=${PAYMENT_API_KEY}
+                  - SECRET_KEY=${PAYMENT_SECRET_KEY}
+                  - CREATE_PAYMENT_SESSION_URL=${CREATE_PAYMENT_SESSION_URL}
+                  - GET_PAYMENT_URL=${GET_PAYMENT_URL}
+                  - SUCCESS_URL=${PAYMENT_SUCCESS_URL}
+                  - BACK_URL=${PAYMENT_BACK_URL}
+                  - NOTIFICATION_URL=${PAYMENT_NOTIFICATION_URL}

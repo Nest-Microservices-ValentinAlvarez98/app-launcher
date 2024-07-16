@@ -10,3 +10,6 @@
 [submodule "payments-ms"]
 	path = payments-ms
 	url = https://github.com/Nest-Microservices-EasyClickUy/payments-microservice.git
+[submodule "users-ms"]
+	path = users-ms
+	url = https://github.com/Nest-Microservices-EasyClickUy/users-microservice.git
