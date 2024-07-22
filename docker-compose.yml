@@ -100,3 +100,13 @@ services:
                   - SUCCESS_URL=${PAYMENT_SUCCESS_URL}
                   - BACK_URL=${PAYMENT_BACK_URL}
                   - NOTIFICATION_URL=${PAYMENT_NOTIFICATION_URL}
+
+      auth-ms:
+            container_name: auth-ms
+            build: ./auth-ms
+            volumes:
+                  - ./auth-ms/src:/usr/src/app/src
+            command: npm run start:dev
+            environment:
+                  - PORT=3005
+                  - NATS_SERVERS=${NATS_SERVER_CONNECTION_URI}
