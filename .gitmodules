@@ -13,3 +13,6 @@
 [submodule "users-ms"]
 	path = users-ms
 	url = https://github.com/Nest-Microservices-EasyClickUy/users-microservice.git
+[submodule "auth-ms"]
+	path = auth-ms
+	url = https://github.com/Nest-Microservices-ValentinAlvarez98/auth-microservice.git
