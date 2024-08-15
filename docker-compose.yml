@@ -101,6 +101,17 @@ services:
                   - BACK_URL=${PAYMENT_BACK_URL}
                   - NOTIFICATION_URL=${PAYMENT_NOTIFICATION_URL}
 
+      auth-db:
+            image: mongo:latest
+            container_name: auth_database
+            restart: always
+            volumes:
+                  - ./auth-ms/mongo:/data/db
+                  - ./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+            ports:
+                  - "27017:27017"
+            command: ["/bin/bash", "/docker-entrypoint-initdb.d/init-mongo.sh"]
+
       auth-ms:
             container_name: auth-ms
             build: ./auth-ms
@@ -110,3 +121,5 @@ services:
             environment:
                   - PORT=3005
                   - NATS_SERVERS=${NATS_SERVER_CONNECTION_URI}
+                  - DATABASE_URL=${AUTH_DATABASE_URL}
+                  - JWT_SECRET=${JWT_SECRET}
